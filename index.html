@@ -3,72 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touch - CAS</title>
+    <title>CAS - Touch Custom</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        #start-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: transparent; color: #ff4d4d; border: 2px solid #ff4d4d; border-radius: 25px; transition: 0.3s; z-index: 10; }
-        #start-btn:hover { background: #ff4d4d; color: #000; box-shadow: 0 0 20px #ff4d4d; }
+        body { background-color: #000; color: #fff; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        #start-btn { padding: 15px 40px; font-size: 22px; cursor: pointer; background: none; color: #ff3366; border: 2px solid #ff3366; border-radius: 50px; transition: 0.4s; box-shadow: 0 0 10px #ff3366; }
+        #start-btn:hover { background: #ff3366; color: #000; box-shadow: 0 0 30px #ff3366; }
         
-        /* تصميم شكل القلب */
-        #heart-container { position: absolute; width: 300px; height: 300px; display: none; flex-wrap: wrap; justify-content: center; align-items: center; text-align: center; }
-        .lyrics { font-size: 14px; color: #ffb3b3; line-height: 1.2; text-shadow: 0 0 5px #ff4d4d; }
-        
-        /* رسمة القلب الوهمية لتوزيع الكلام */
-        .heart-shape { position: relative; width: 100%; height: 100%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #heart-wrapper { display: none; position: relative; width: 450px; height: 450px; }
+        .lyrics-container {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+            animation: heartbeat 1.2s infinite;
+        }
+        .char { position: absolute; font-size: 11px; color: #ff3366; text-shadow: 0 0 5px #ff4d4d; opacity: 0; transition: opacity 0.4s; font-weight: bold; }
+
+        @keyframes heartbeat { 0% { transform: scale(1); } 20% { transform: scale(1.1); } 40% { transform: scale(1.05); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <button id="start-btn">تحبني ؟</button>
 
-    <div id="heart-container">
-        <div class="heart-shape" id="lyrics-box"></div>
+    <div id="heart-wrapper">
+        <div class="lyrics-container" id="heart-box"></div>
     </div>
 
     <audio id="cas-song">
-        <source src="your-song-link-here.mp3" type="audio/mpeg">
+        <source src="touch.mp3" type="audio/mpeg">
     </audio>
 
     <script>
         const btn = document.getElementById('start-btn');
         const audio = document.getElementById('cas-song');
-        const container = document.getElementById('heart-container');
-        const lyricsBox = document.getElementById('lyrics-box');
+        const heartBox = document.getElementById('heart-box');
+        const wrapper = document.getElementById('heart-wrapper');
 
-        // الكلمات من دقيقة 3:00 إلى 3:39
-        const lyricsText = "Touch... I wanna feel your body... \n I wanna feel your soul... \n Just let me hold you close... \n Everything is fine... \n When you're mine... \n Touch...".repeat(5);
+        // الكلمات المحددة بالضبط من المقطع الصوتي
+        const lyricsText = "couldn't say you didn't want me then... when we were lying in my bed that night... you were acting like I couldn't help myself... suddenly you wanted to just be friends... I'm so-so-so-so took a shower so you couldn't hear me... you know that I take heart-to-know... the home is breaking... you were sleeping or just faking... sleeping all over... every time we touch... bleeding me over... every time we touch... feeling so lonely... 'cause it's not enough... missing you only... ever since we fell in love... ".repeat(3);
 
         btn.addEventListener('click', () => {
             btn.style.display = 'none';
-            container.style.display = 'flex';
-            
-            // تشغيل من الدقيقة 3:00 (180 ثانية)
-            audio.currentTime = 180; 
+            wrapper.style.display = 'block';
             audio.play();
 
-            // إيقاف عند الدقيقة 3:39 (219 ثانية)
-            audio.ontimeupdate = function() {
-                if (audio.currentTime >= 219) {
-                    audio.pause();
-                }
-            };
-
-            // كتابة الكلام على شكل قلب
-            let i = 0;
-            function typeLyrics() {
-                if (i < lyricsText.length) {
-                    let span = document.createElement('span');
-                    span.className = 'lyrics';
-                    span.innerHTML = lyricsText.charAt(i) === '\n' ? '<br>' : lyricsText.charAt(i);
-                    lyricsBox.appendChild(span);
-                    i++;
-                    setTimeout(typeLyrics, 50); // سرعة الكتابة
-                }
-            }
-            typeLyrics();
+            const words = lyricsText.split("");
+            const total = words.length;
+            
+            words.forEach((char, i) => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.innerText = char;
+                
+                // معادلة القلب (للتوزيع)
+                const t = (i / total) * 2 * Math.PI;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                
+                span.style.left = (x * 13 + 225) + 'px';
+                span.style.top = (y * 13 + 200) + 'px';
+                
+                heartBox.appendChild(span);
+                
+                // توقيت الظهور ليتناسب مع رتم الأغنية
+                setTimeout(() => {
+                    span.style.opacity = '1';
+                }, i * 45); 
+            });
         });
     </script>
 </body>
-  </html>
-  
+</html>
