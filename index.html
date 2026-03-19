@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch - CAS</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        #start-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: transparent; color: #ff4d4d; border: 2px solid #ff4d4d; border-radius: 25px; transition: 0.3s; z-index: 10; }
+        #start-btn:hover { background: #ff4d4d; color: #000; box-shadow: 0 0 20px #ff4d4d; }
+        
+        /* تصميم شكل القلب */
+        #heart-container { position: absolute; width: 300px; height: 300px; display: none; flex-wrap: wrap; justify-content: center; align-items: center; text-align: center; }
+        .lyrics { font-size: 14px; color: #ffb3b3; line-height: 1.2; text-shadow: 0 0 5px #ff4d4d; }
+        
+        /* رسمة القلب الوهمية لتوزيع الكلام */
+        .heart-shape { position: relative; width: 100%; height: 100%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <button id="start-btn">تحبني ؟</button>
+
+    <div id="heart-container">
+        <div class="heart-shape" id="lyrics-box"></div>
+    </div>
+
+    <audio id="cas-song">
+        <source src="your-song-link-here.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const btn = document.getElementById('start-btn');
+        const audio = document.getElementById('cas-song');
+        const container = document.getElementById('heart-container');
+        const lyricsBox = document.getElementById('lyrics-box');
+
+        // الكلمات من دقيقة 3:00 إلى 3:39
+        const lyricsText = "Touch... I wanna feel your body... \n I wanna feel your soul... \n Just let me hold you close... \n Everything is fine... \n When you're mine... \n Touch...".repeat(5);
+
+        btn.addEventListener('click', () => {
+            btn.style.display = 'none';
+            container.style.display = 'flex';
+            
+            // تشغيل من الدقيقة 3:00 (180 ثانية)
+            audio.currentTime = 180; 
+            audio.play();
+
+            // إيقاف عند الدقيقة 3:39 (219 ثانية)
+            audio.ontimeupdate = function() {
+                if (audio.currentTime >= 219) {
+                    audio.pause();
+                }
+            };
+
+            // كتابة الكلام على شكل قلب
+            let i = 0;
+            function typeLyrics() {
+                if (i < lyricsText.length) {
+                    let span = document.createElement('span');
+                    span.className = 'lyrics';
+                    span.innerHTML = lyricsText.charAt(i) === '\n' ? '<br>' : lyricsText.charAt(i);
+                    lyricsBox.appendChild(span);
+                    i++;
+                    setTimeout(typeLyrics, 50); // سرعة الكتابة
+                }
+            }
+            typeLyrics();
+        });
+    </script>
+</body>
+  </html>
+  
