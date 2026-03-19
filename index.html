@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS - Heart Lyrics</title>
+    <title>CAS - Sync Heart</title>
     <style>
         body { background-color: #000; color: #fff; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
-        #start-btn { padding: 15px 40px; font-size: 22px; cursor: pointer; background: none; color: #ff3366; border: 2px solid #ff3366; border-radius: 50px; transition: 0.4s; }
-        #start-btn:hover { background: #ff3366; color: #000; }
-        
-        #heart-wrapper { display: none; position: relative; width: 500px; height: 500px; }
-        .lyrics-container { position: absolute; width: 100%; height: 100%; display: block; }
-        .char { position: absolute; font-size: 10px; color: #ff3366; text-shadow: 0 0 2px #ff4d4d; opacity: 0; transition: opacity 0.5s; font-weight: bold; }
+        #start-btn { padding: 15px 40px; font-size: 22px; cursor: pointer; background: none; color: #ff3366; border: 2px solid #ff3366; border-radius: 50px; transition: 0.4s; z-index: 100; }
+        #heart-wrapper { display: none; position: relative; width: 600px; height: 600px; }
+        .char { position: absolute; font-size: 11px; color: #ff3366; text-shadow: 0 0 2px #ff4d4d; opacity: 0; transition: opacity 0.3s; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -19,7 +16,7 @@
     <button id="start-btn">تحبني ؟</button>
 
     <div id="heart-wrapper">
-        <div class="lyrics-container" id="heart-box"></div>
+        <div id="heart-box"></div>
     </div>
 
     <audio id="cas-song">
@@ -32,50 +29,68 @@
         const heartBox = document.getElementById('heart-box');
         const wrapper = document.getElementById('heart-wrapper');
 
-        // الكلمات المحددة من المقطع
-        const text = "couldn't say you didn't want me then... when we were lying in my bed that night... you were acting like I couldn't help myself... suddenly you wanted to just be friends... I'm so-so-so-so took a shower so you couldn't hear me... you know that I take heart-to-know... the home is breaking... you were sleeping or just faking... sleeping all over... every time we touch... bleeding me over... every time we touch... feeling so lonely... 'cause it's not enough... missing you only... ever since we fell in love... ";
-        const lyricsText = text.repeat(10); // تكرار لملء مساحة القلب
+        // خريطة الكلمات مع وقت ظهورها بالثواني (تقريبي حسب المقطع)
+        const syncData = [
+            { start: 0, text: "couldn't say you didn't want me then... " },
+            { start: 3, text: "when we were lying in my bed that night... " },
+            { start: 7, text: "you were acting like I couldn't help myself... " },
+            { start: 11, text: "suddenly you wanted to just be friends... " },
+            { start: 15, text: "I'm so-so-so-so took a shower so you couldn't hear me... " },
+            { start: 20, text: "you know that I take heart-to-know... " },
+            { start: 24, text: "the home is breaking... you were sleeping or just faking... " },
+            { start: 29, text: "sleeping all over... every time we touch... " },
+            { start: 34, text: "bleeding me over... every time we touch... " },
+            { start: 39, text: "feeling so lonely... 'cause it's not enough... " },
+            { start: 43, text: "missing you only... ever since we fell in love... " }
+        ];
+
+        let allChars = [];
+        let currentCharIndex = 0;
+
+        // توليد نقاط القلب مسبقاً
+        function createHeartPoints() {
+            const rows = 35;
+            const cols = 70;
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    let nx = (x - cols / 2) / (cols / 3);
+                    let ny = (rows / 2 - y) / (rows / 4);
+                    if (Math.pow(nx*nx + ny*ny - 1, 3) - nx*nx * ny*ny*ny <= 0) {
+                        const span = document.createElement('span');
+                        span.className = 'char';
+                        span.style.left = (x * 8) + 'px';
+                        span.style.top = (y * 13) + 'px';
+                        heartBox.appendChild(span);
+                        allChars.push(span);
+                    }
+                }
+            }
+        }
 
         btn.addEventListener('click', () => {
             btn.style.display = 'none';
             wrapper.style.display = 'block';
+            createHeartPoints();
             audio.play();
+        });
 
-            const chars = lyricsText.split("");
-            let charIndex = 0;
-            const rows = 35; // عدد الأسطر لرسم القلب
-            const cols = 70; // عدد الأعمدة
-
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
-                    // تحويل الإحداثيات لمعادلة القلب الرياضية
-                    let nx = (x - cols / 2) / (cols / 3);
-                    let ny = (rows / 2 - y) / (rows / 4);
-                    
-                    // معادلة فحص إذا كانت النقطة داخل حدود القلب
-                    if (Math.pow(nx*nx + ny*ny - 1, 3) - nx*nx * ny*ny*ny <= 0) {
-                        if (charIndex < chars.length) {
-                            const span = document.createElement('span');
-                            span.className = 'char';
-                            span.innerText = chars[charIndex];
-                            
-                            // توزيع الحروف بمسافات ثابتة (مستقر)
-                            span.style.left = (x * 7) + 'px'; 
-                            span.style.top = (y * 12) + 'px';
-                            
-                            heartBox.appendChild(span);
-                            
-                            // توقيت الظهور المتسلسل
-                            const currentIdx = charIndex;
-                            setTimeout(() => {
-                                span.style.opacity = '1';
-                            }, currentIdx * 15);
-                            
-                            charIndex++;
+        audio.addEventListener('timeupdate', () => {
+            const currentTime = audio.currentTime;
+            
+            syncData.forEach(data => {
+                if (currentTime >= data.start && !data.played) {
+                    const words = data.text.split("");
+                    words.forEach((char, index) => {
+                        if (allChars[currentCharIndex]) {
+                            allChars[currentCharIndex].innerText = char;
+                            const target = allChars[currentCharIndex];
+                            setTimeout(() => { target.style.opacity = '1'; }, index * 50);
+                            currentCharIndex++;
                         }
-                    }
+                    });
+                    data.played = true; // نضمن إن الكلمات تنطبع مرة واحدة
                 }
-            }
+            });
         });
     </script>
 </body>
