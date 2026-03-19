@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS - Touch Custom</title>
+    <title>CAS - Heart Lyrics</title>
     <style>
         body { background-color: #000; color: #fff; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
-        #start-btn { padding: 15px 40px; font-size: 22px; cursor: pointer; background: none; color: #ff3366; border: 2px solid #ff3366; border-radius: 50px; transition: 0.4s; box-shadow: 0 0 10px #ff3366; }
-        #start-btn:hover { background: #ff3366; color: #000; box-shadow: 0 0 30px #ff3366; }
+        #start-btn { padding: 15px 40px; font-size: 22px; cursor: pointer; background: none; color: #ff3366; border: 2px solid #ff3366; border-radius: 50px; transition: 0.4s; }
+        #start-btn:hover { background: #ff3366; color: #000; }
         
-        #heart-wrapper { display: none; position: relative; width: 450px; height: 450px; }
-        .lyrics-container {
-            position: absolute; width: 100%; height: 100%;
-            display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-            animation: heartbeat 1.2s infinite;
-        }
-        .char { position: absolute; font-size: 11px; color: #ff3366; text-shadow: 0 0 5px #ff4d4d; opacity: 0; transition: opacity 0.4s; font-weight: bold; }
-
-        @keyframes heartbeat { 0% { transform: scale(1); } 20% { transform: scale(1.1); } 40% { transform: scale(1.05); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        #heart-wrapper { display: none; position: relative; width: 500px; height: 500px; }
+        .lyrics-container { position: absolute; width: 100%; height: 100%; display: block; }
+        .char { position: absolute; font-size: 10px; color: #ff3366; text-shadow: 0 0 2px #ff4d4d; opacity: 0; transition: opacity 0.5s; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -38,37 +32,50 @@
         const heartBox = document.getElementById('heart-box');
         const wrapper = document.getElementById('heart-wrapper');
 
-        // الكلمات المحددة بالضبط من المقطع الصوتي
-        const lyricsText = "couldn't say you didn't want me then... when we were lying in my bed that night... you were acting like I couldn't help myself... suddenly you wanted to just be friends... I'm so-so-so-so took a shower so you couldn't hear me... you know that I take heart-to-know... the home is breaking... you were sleeping or just faking... sleeping all over... every time we touch... bleeding me over... every time we touch... feeling so lonely... 'cause it's not enough... missing you only... ever since we fell in love... ".repeat(3);
+        // الكلمات المحددة من المقطع
+        const text = "couldn't say you didn't want me then... when we were lying in my bed that night... you were acting like I couldn't help myself... suddenly you wanted to just be friends... I'm so-so-so-so took a shower so you couldn't hear me... you know that I take heart-to-know... the home is breaking... you were sleeping or just faking... sleeping all over... every time we touch... bleeding me over... every time we touch... feeling so lonely... 'cause it's not enough... missing you only... ever since we fell in love... ";
+        const lyricsText = text.repeat(10); // تكرار لملء مساحة القلب
 
         btn.addEventListener('click', () => {
             btn.style.display = 'none';
             wrapper.style.display = 'block';
             audio.play();
 
-            const words = lyricsText.split("");
-            const total = words.length;
-            
-            words.forEach((char, i) => {
-                const span = document.createElement('span');
-                span.className = 'char';
-                span.innerText = char;
-                
-                // معادلة القلب (للتوزيع)
-                const t = (i / total) * 2 * Math.PI;
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                
-                span.style.left = (x * 13 + 225) + 'px';
-                span.style.top = (y * 13 + 200) + 'px';
-                
-                heartBox.appendChild(span);
-                
-                // توقيت الظهور ليتناسب مع رتم الأغنية
-                setTimeout(() => {
-                    span.style.opacity = '1';
-                }, i * 45); 
-            });
+            const chars = lyricsText.split("");
+            let charIndex = 0;
+            const rows = 35; // عدد الأسطر لرسم القلب
+            const cols = 70; // عدد الأعمدة
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    // تحويل الإحداثيات لمعادلة القلب الرياضية
+                    let nx = (x - cols / 2) / (cols / 3);
+                    let ny = (rows / 2 - y) / (rows / 4);
+                    
+                    // معادلة فحص إذا كانت النقطة داخل حدود القلب
+                    if (Math.pow(nx*nx + ny*ny - 1, 3) - nx*nx * ny*ny*ny <= 0) {
+                        if (charIndex < chars.length) {
+                            const span = document.createElement('span');
+                            span.className = 'char';
+                            span.innerText = chars[charIndex];
+                            
+                            // توزيع الحروف بمسافات ثابتة (مستقر)
+                            span.style.left = (x * 7) + 'px'; 
+                            span.style.top = (y * 12) + 'px';
+                            
+                            heartBox.appendChild(span);
+                            
+                            // توقيت الظهور المتسلسل
+                            const currentIdx = charIndex;
+                            setTimeout(() => {
+                                span.style.opacity = '1';
+                            }, currentIdx * 15);
+                            
+                            charIndex++;
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>
